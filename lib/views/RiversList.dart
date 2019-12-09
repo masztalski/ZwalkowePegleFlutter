@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/bloc/RiverListBloc.dart';
 import 'package:zwalkowe_pegle/components/BasicListItem.dart';
+import 'package:zwalkowe_pegle/components/EmptyList.dart';
 import 'package:zwalkowe_pegle/models/Region.dart';
 import 'package:zwalkowe_pegle/models/River.dart';
 import 'package:zwalkowe_pegle/views/RiverStations.dart';
@@ -44,7 +45,7 @@ class _RiverList extends State<RiverList> {
             stream: _riverListBlock.getRiversStream,
             builder: (context, AsyncSnapshot<List<River>> snapshot) {
               if (snapshot.data == null || snapshot.data.isEmpty) {
-                return _emptyList();
+                return EmptyList();
               } else {
                 return ListView.builder(
                     itemCount: snapshot.data.length,
@@ -56,10 +57,6 @@ class _RiverList extends State<RiverList> {
                     });
               }
             }));
-  }
-
-  Widget _emptyList() {
-    return Center(child: CircularProgressIndicator());
   }
 
   void _onRiverSelected(River river) {

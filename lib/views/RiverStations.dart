@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/bloc/RiverStationsBloc.dart';
+import 'package:zwalkowe_pegle/components/EmptyList.dart';
 import 'package:zwalkowe_pegle/components/StationListItem.dart';
 import 'package:zwalkowe_pegle/models/River.dart';
 import 'package:zwalkowe_pegle/models/StationWithDetails.dart';
+import 'package:zwalkowe_pegle/views/StationDetailsView.dart';
 
 class RiverStations extends StatefulWidget {
   final River selectedRiver;
@@ -40,7 +42,7 @@ class _RiverStations extends State<RiverStations> {
             builder:
                 (context, AsyncSnapshot<List<StationWithDetails>> snapshot) {
               if (snapshot.data == null || snapshot.data.isEmpty) {
-                return _emptyList();
+                return EmptyList();
               } else {
                 return ListView.builder(
                     itemCount: snapshot.data.length,
@@ -54,9 +56,12 @@ class _RiverStations extends State<RiverStations> {
             }));
   }
 
-  Widget _emptyList() {
-    return Center(child: CircularProgressIndicator());
+  void _onStationSelected(StationWithDetails station) {
+    Navigator.push(context,
+        MaterialPageRoute<void>(builder: (BuildContext context) {
+      return StationDetailsView(
+        selectedStation: station,
+      );
+    }));
   }
-
-  void _onStationSelected(StationWithDetails station) {}
 }

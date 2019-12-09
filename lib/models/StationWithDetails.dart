@@ -1,4 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:zwalkowe_pegle/models/DischargeRecord.dart';
+import 'package:zwalkowe_pegle/models/LevelRecord.dart';
 
 part 'StationWithDetails.g.dart';
 
@@ -17,6 +19,9 @@ class StationWithDetails {
   final String riverName;
   final double riverCourseKm;
   final String trend;
+
+  List<LevelRecord> levelsHistory;
+  List<DischargeRecord> dischargeHistory;
 
   StationWithDetails(this.date, this.currentLevel, this.currentDischarge,
       this.stationID, this.stationName, this.riverName, this.riverCourseKm,

@@ -34,10 +34,8 @@ class RiverListBlock extends Bloc {
   void getRivers(Region region) {
     _repository.getStationsForRegion(region.regionName).then((it) {
       _regionStations = it.toList(growable: false);
-      return it
-          .map((it) => it.river)
-          .toSet()
-          .map((it) => River(shortName: _getRiverShortName(it), fullName: it));
+      return it.map((it) => it.river).toSet().map(
+          (it) => River(shortName: River.getRiverShortName(it), fullName: it));
     }).then((it) {
       List<River> _downloadedRivers = it.toList(growable: false);
       _publishSubjectRiver.sink.add(_downloadedRivers);
@@ -45,12 +43,9 @@ class RiverListBlock extends Bloc {
     });
   }
 
-  String _getRiverShortName(String fullName) {
-    return fullName.substring(0, fullName.lastIndexOf('(') - 1);
-  }
-
   Observable<List<River>> get getRiversStream => _publishSubjectRiver.stream;
 
   List<River> get regionRivers => _regionRivers;
+
   List<Station> get regionStations => _regionStations;
 }
