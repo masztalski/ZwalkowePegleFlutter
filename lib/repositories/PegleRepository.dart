@@ -80,6 +80,4 @@ class PegleRepository {
       }
     });
   }
-
-  //TODO add BLOCs transforming list of station into list of rivers per station
 }

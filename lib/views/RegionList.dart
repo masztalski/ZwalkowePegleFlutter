@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/components/BasicListItem.dart';
-import 'package:zwalkowe_pegle/repositories/PegleRepository.dart';
+import 'package:zwalkowe_pegle/models/Region.dart';
+import 'package:zwalkowe_pegle/views/RiversList.dart';
 
 class RegionList extends StatefulWidget {
   _RegionList createState() => _RegionList();
@@ -8,6 +9,7 @@ class RegionList extends StatefulWidget {
 
 class _RegionList extends State<RegionList> {
   var regions = [
+    'dolnośląskie',
     'kujawsko-Pomorskie',
     'lubelskie',
     'lubuskie',
@@ -22,15 +24,8 @@ class _RegionList extends State<RegionList> {
     'świętokrzyskie',
     'warmińsko-mazurskie',
     'wielkopolskie',
-    'zachodniopomorskie',
-    'dolnośląskie'
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    regions.sort();
-  }
+    'zachodniopomorskie'
+  ].map((it) => Region(regionName: it));
 
   @override
   Widget build(BuildContext context) {
@@ -49,15 +44,18 @@ class _RegionList extends State<RegionList> {
         body: ListView.builder(
           itemCount: regions.length,
           itemBuilder: (BuildContext ctxt, int index) {
-            return new GestureDetector(
-                //You need to make my child interactive
-                onTap: () => onRegionSelected(regions[index]),
-                child: BasicListItem(regionName: regions[index]));
+            return GestureDetector(
+                onTap: () => onRegionSelected(regions.elementAt(index)),
+                child: BasicListItem(
+                    regionName: regions.elementAt(index).regionName));
           },
         ));
   }
 
-  void onRegionSelected(String regionName) {
-    PegleRepository().getStationsForRegion(regionName);
+  void onRegionSelected(Region region) {
+    Navigator.push(context,
+        MaterialPageRoute<void>(builder: (BuildContext context) {
+      return RiverList(selectedRegion: region);
+    }));
   }
 }
