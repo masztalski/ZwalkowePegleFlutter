@@ -38,6 +38,7 @@ class RiverListBlock extends Bloc {
           (it) => River(shortName: River.getRiverShortName(it), fullName: it));
     }).then((it) {
       List<River> _downloadedRivers = it.toList(growable: false);
+      _downloadedRivers.sort((a, b) => a.fullName.compareTo(b.fullName));
       _publishSubjectRiver.sink.add(_downloadedRivers);
       _regionRivers = _downloadedRivers;
     });

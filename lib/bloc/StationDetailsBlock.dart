@@ -4,6 +4,8 @@ import 'package:zwalkowe_pegle/models/LevelRecord.dart';
 import 'package:zwalkowe_pegle/models/Record.dart';
 import 'package:zwalkowe_pegle/models/StationWithDetails.dart';
 import 'package:zwalkowe_pegle/repositories/PegleRepository.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:zwalkowe_pegle/res/Strings.dart';
 
 import 'Block.dart';
 
@@ -35,6 +37,32 @@ class StationDetailsBlock extends Bloc {
       _stationWithDetails.dischargeHistory = it.whereType<List<DischargeRecord>>().first.toList(growable: false);
       _publishSubjectStationWithDetails.sink.add(_stationWithDetails);
     });
+  }
+
+  List<charts.Series<LevelRecord, DateTime>> getLevelData(
+      StationWithDetails station) {
+    return [
+      charts.Series<LevelRecord, DateTime>(
+        id: Strings.levelChartId,
+        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
+        domainFn: (LevelRecord record, _) => record.date,
+        measureFn: (LevelRecord record, _) => record.value,
+        data: station.levelsHistory,
+      )
+    ];
+  }
+
+  List<charts.Series<DischargeRecord, DateTime>> getDischargeData(
+      StationWithDetails station) {
+    return [
+      charts.Series<DischargeRecord, DateTime>(
+        id: Strings.dischargeChartId,
+        colorFn: (_, __) => charts.MaterialPalette.red.shadeDefault,
+        domainFn: (DischargeRecord record, _) => record.date,
+        measureFn: (DischargeRecord record, _) => record.value,
+        data: station.dischargeHistory,
+      )
+    ];
   }
 
   @override

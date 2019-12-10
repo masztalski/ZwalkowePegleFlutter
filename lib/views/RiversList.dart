@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/bloc/RiverListBloc.dart';
 import 'package:zwalkowe_pegle/components/BasicListItem.dart';
 import 'package:zwalkowe_pegle/components/EmptyList.dart';
+import 'package:zwalkowe_pegle/components/Toolbar.dart';
 import 'package:zwalkowe_pegle/models/Region.dart';
 import 'package:zwalkowe_pegle/models/River.dart';
+import 'package:zwalkowe_pegle/res/Strings.dart';
 import 'package:zwalkowe_pegle/views/RiverStations.dart';
 
 class RiverList extends StatefulWidget {
@@ -29,17 +31,7 @@ class _RiverList extends State<RiverList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            centerTitle: true,
-            title: Column(children: [
-              Text("Zwałkowe Pegle"),
-              Text(
-                selectedRegion.regionName,
-                style: TextStyle(
-                  inherit: false,
-                ),
-              )
-            ])),
+        appBar: Toolbar(mainTitle: Strings.appName, subTitle: selectedRegion.regionName),
         body: StreamBuilder(
             initialData: _riverListBlock.regionRivers,
             stream: _riverListBlock.getRiversStream,

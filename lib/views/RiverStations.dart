@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/bloc/RiverStationsBloc.dart';
 import 'package:zwalkowe_pegle/components/EmptyList.dart';
 import 'package:zwalkowe_pegle/components/StationListItem.dart';
+import 'package:zwalkowe_pegle/components/Toolbar.dart';
 import 'package:zwalkowe_pegle/models/River.dart';
 import 'package:zwalkowe_pegle/models/StationWithDetails.dart';
 import 'package:zwalkowe_pegle/views/StationDetailsView.dart';
@@ -31,11 +32,7 @@ class _RiverStations extends State<RiverStations> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            centerTitle: true,
-            title: Text(
-              selectedRiver.shortName,
-            )),
+        appBar: Toolbar(mainTitle: selectedRiver.shortName),
         body: StreamBuilder(
             initialData: _riverStationsBlock.riverStations,
             stream: _riverStationsBlock.getRiverStations,

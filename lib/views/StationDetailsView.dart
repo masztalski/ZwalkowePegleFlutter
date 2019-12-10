@@ -1,12 +1,15 @@
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/bloc/StationDetailsBlock.dart';
 import 'package:zwalkowe_pegle/components/EmptyList.dart';
-import 'package:zwalkowe_pegle/models/DischargeRecord.dart';
-import 'package:zwalkowe_pegle/models/LevelRecord.dart';
+import 'package:zwalkowe_pegle/components/TextWithIcon.dart';
+import 'package:zwalkowe_pegle/components/Toolbar.dart';
+import 'package:zwalkowe_pegle/components/TrendImage.dart';
 import 'package:zwalkowe_pegle/models/River.dart';
 import 'package:zwalkowe_pegle/models/StationWithDetails.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
-import 'package:intl/intl.dart';
+import 'package:zwalkowe_pegle/res/Assets.dart';
+import 'package:zwalkowe_pegle/res/Strings.dart';
+import 'package:zwalkowe_pegle/utils/DateTimeAxisWorkaround.dart';
 
 class StationDetailsView extends StatefulWidget {
   final StationWithDetails selectedStation;
@@ -33,17 +36,9 @@ class _StationDetailsView extends State<StationDetailsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            centerTitle: true,
-            title: Column(children: [
-              Text(River.getRiverShortName(selectedStation.riverName)),
-              Text(
-                selectedStation.stationName,
-                style: TextStyle(
-                  inherit: false,
-                ),
-              )
-            ])),
+        appBar: Toolbar(
+            mainTitle: River.getRiverShortName(selectedStation.riverName),
+            subTitle: selectedStation.stationName),
         body: StreamBuilder(
             initialData: _stationDetailsBlock.stationDetails,
             stream: _stationDetailsBlock.getStationDetails,
@@ -51,114 +46,99 @@ class _StationDetailsView extends State<StationDetailsView> {
               if (snapshot.data == null || snapshot.data.stationName.isEmpty) {
                 return EmptyList();
               } else {
-                return Column(
-                  children: [
-                    _basicData(),
-                    SizedBox(height: 20),
-                    Container(height: 200, child: _levelChart(snapshot.data)),
-                    SizedBox(height: 20),
-                    Container(
-                        height: 200, child: _dischargeChart(snapshot.data))
-                  ],
-                );
+                return Container(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        _basicData(),
+                        SizedBox(height: 20),
+                        Container(
+                            height: 200, child: _levelChart(snapshot.data)),
+                        SizedBox(height: 20),
+                        Container(
+                            height: 200, child: _dischargeChart(snapshot.data))
+                      ],
+                    ));
               }
             }));
   }
 
   Widget _basicData() {
-    var formatter = DateFormat('yyyy-MM-dd HH:mm');
     return Row(children: [
-      Expanded(child: Column(
-        children: [
-          Text("Dane z ${formatter.format(selectedStation.date)}", textAlign: TextAlign.left,),
-          Row(
+      Expanded(
+          flex: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(child: _textWithIcon(
-                  "assets/ruler.png", selectedStation.currentLevel.toString())),
-              Expanded(child: _textWithIcon("assets/speedometer.png",
-                  selectedStation.currentDischarge.toString()))
+              Text(
+                Strings.dateOfData(selectedStation.date),
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: 15),
+              Row(
+                children: [
+                  Expanded(
+                      child: TextWithIcon(
+                          imageName: Assets.waterLevel,
+                          text:
+                              "${selectedStation.currentLevel.toString()} cm")),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Expanded(
+                      child: TextWithIcon(
+                          imageName: Assets.waterDischarge,
+                          text:
+                              "${selectedStation.currentDischarge.toString()} m${Strings.superScript3}/s"))
+                ],
+              )
             ],
-          )
-        ],
-      )),
-      _trendImage(selectedStation.trend),
+          )),
+      Expanded(
+          flex: 1,
+          child: TrendImage(
+              trend: selectedStation.trend,
+              height: 50,
+              width: 30,
+              fit: BoxFit.fill)),
     ]);
-  }
-
-  Widget _textWithIcon(String imageName, String value) {
-    return Row(children: [
-      _smallImage(imageName),
-      SizedBox(width: 10,),
-      Text(value),
-    ]);
-  }
-
-  Widget _smallImage(String imageName) {
-    return Image(
-      image: AssetImage(imageName),
-      height: 20,
-    );
-  }
-
-  Widget _trendImage(String trend) {
-    String _imageName;
-    switch (trend) {
-      case "const":
-        _imageName = 'assets/trending-neutral.png';
-        break;
-      case "down":
-        _imageName = 'assets/trending-down.png';
-        break;
-      case "up":
-        _imageName = 'assets/trending-up.png';
-        break;
-      default:
-        _imageName = 'assets/help.png';
-    }
-    return Image(
-      image: AssetImage(_imageName),
-      height: 40,
-    );
   }
 
   Widget _levelChart(StationWithDetails station) {
     if (station.levelsHistory != null && station.levelsHistory.isNotEmpty) {
-      return charts.TimeSeriesChart(getLevelData(station), animate: true);
+      var endDate = station.levelsHistory.last.date;
+      var startDate = station.levelsHistory
+          .elementAt(station.levelsHistory.length - 24)
+          .date;
+      return charts.TimeSeriesChart(_stationDetailsBlock.getLevelData(station),
+          animate: true,
+          behaviors: [charts.PanAndZoomBehavior(),charts.SeriesLegend()],
+          domainAxis: DateTimeAxisSpecWorkaround(
+              viewport: charts.DateTimeExtents(start: startDate, end: endDate),
+              tickProviderSpec: charts.AutoDateTimeTickProviderSpec()));
     }
-    return Center(child: Text("Brak danych"));
+    return Center(child: Text(Strings.dataMissing));
   }
 
   Widget _dischargeChart(StationWithDetails station) {
     if (station.dischargeHistory != null &&
         station.dischargeHistory.isNotEmpty) {
-      return charts.TimeSeriesChart(getDischargeData(station), animate: true);
+      var endDate = station.dischargeHistory.last.date;
+      var startDate = station.dischargeHistory
+          .elementAt(station.dischargeHistory.length - 24)
+          .date;
+      return charts.TimeSeriesChart(
+          _stationDetailsBlock.getDischargeData(station),
+          animate: true,
+          behaviors: [charts.PanAndZoomBehavior(),charts.SeriesLegend()],
+          domainAxis: DateTimeAxisSpecWorkaround(
+              viewport: charts.DateTimeExtents(start: startDate, end: endDate),
+              tickProviderSpec: charts.AutoDateTimeTickProviderSpec(includeTime: true)),
+          primaryMeasureAxis: new charts.NumericAxisSpec(
+              renderSpec: new charts.SmallTickRendererSpec(
+                // Tick and Label styling here.
+              )));
     }
-    return Center(child: Text("Brak danych"));
-  }
-
-  List<charts.Series<LevelRecord, DateTime>> getLevelData(
-      StationWithDetails station) {
-    return [
-      charts.Series<LevelRecord, DateTime>(
-        id: 'Poziom wody [cm]',
-        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-        domainFn: (LevelRecord record, _) => record.date,
-        measureFn: (LevelRecord record, _) => record.value,
-        data: station.levelsHistory,
-      )
-    ];
-  }
-
-  List<charts.Series<DischargeRecord, DateTime>> getDischargeData(
-      StationWithDetails station) {
-    return [
-      charts.Series<DischargeRecord, DateTime>(
-        id: 'Przepływ [m${String.fromCharCode(0x00B3)}/s]',
-        colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-        domainFn: (DischargeRecord record, _) => record.date,
-        measureFn: (DischargeRecord record, _) => record.value,
-        data: station.dischargeHistory,
-      )
-    ];
+    return Center(child: Text(Strings.dataMissing));
   }
 }

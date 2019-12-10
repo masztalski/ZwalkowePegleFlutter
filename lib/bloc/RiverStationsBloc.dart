@@ -42,6 +42,7 @@ class RiverStationsBlock extends Bloc {
       futures.add(_repository.getStationDetailsById(station.stationID));
     });
     await Future.wait(futures).then((it) {
+      it.sort((a, b) => a.riverCourseKm.compareTo(b.riverCourseKm));
       _riverStations = it;
       _publishSubjectRiverStations.sink.add(it);
     });

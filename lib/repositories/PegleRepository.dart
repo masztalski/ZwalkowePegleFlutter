@@ -18,7 +18,7 @@ class PegleRepository {
   }
 
   PegleRepository._(){
-    this._client = PegleApi(Dio());
+    this._client = PegleApi(Dio(BaseOptions(connectTimeout: 30000, receiveTimeout: 60000)));
   }
 
   Future<List<Station>> getStationsForRegion(String region) {

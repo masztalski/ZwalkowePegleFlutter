@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:zwalkowe_pegle/models/StationWithDetails.dart';
 
+import 'TrendImage.dart';
+
 class StationListItem extends StatelessWidget {
   final StationWithDetails station;
 
@@ -21,30 +23,7 @@ class StationListItem extends StatelessWidget {
                   "${station.currentDischarge.toString()} m${String.fromCharCode(0x00B3)}/s")
             ],
           )),
-          Expanded(child: _getTrendImage(station.trend))
+          Expanded(child: TrendImage(trend: station.trend))
         ]));
-  }
-
-  Widget _getTrendImage(String trend) {
-    AssetImage asset;
-    switch (trend) {
-      case "const":
-        asset = AssetImage('assets/trending-neutral.png');
-        break;
-      case "down":
-        asset = AssetImage('assets/trending-down.png');
-        break;
-      case "up":
-        asset = AssetImage('assets/trending-up.png');
-        break;
-      default:
-        asset = AssetImage('assets/help.png');
-    }
-
-    return Image(
-      image: asset,
-      fit: BoxFit.scaleDown,
-      height: 40,
-    );
   }
 }
